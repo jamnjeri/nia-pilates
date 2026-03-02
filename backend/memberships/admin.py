@@ -10,7 +10,7 @@ class PackageTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(UserPackage)
 class UserPackageAdmin(admin.ModelAdmin):
-    list_display = ('user', 'package_template', 'expiry_date', 'remaining_credits', 'is_active')
+    list_display = ('user', 'package_template', 'expiry_date', 'credits_remaining', 'is_active')
     list_filter = ('is_active', 'package_template')
     search_fields = ('user__name', 'user__phone_number')
-    readonly_fields = ('expiry_date', 'remaining_credits')
+    readonly_fields = ('expiry_date', 'credits_remaining')
