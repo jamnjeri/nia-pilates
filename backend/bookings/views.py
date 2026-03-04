@@ -25,6 +25,10 @@ class BookSessionView(views.APIView):
         user = request.user
         session_id = request.data.get('session_id')
 
+        # Can't book a class that has already started
+        if session.start_time <= timezone.now():
+            return Response({"error": "Cannot book a session that has already started."}, status=400)
+
         # 1. In[ut safety: Default to 1 slot if not provided, max 5  ---- Try catch to also prevent "abc" error aka Input validation
         try:
             slots = min(int(request.data.get('slots_reserved', 1)), 5)
@@ -109,17 +113,41 @@ class CancelBookingView(views.APIView):
         try:
             booking = Booking.objects.select_for_update().get(id=booking_id, user=user, status='CONFIRMED')
             package = UserPackage.objects.select_for_update().get(id=booking.package.id)
+
+            # THE BUSINESS RULE: 12-Hour Window
+            now = timezone.now()
+            time_until_session = booking.session.start_time - now
             
-            # 1. 2-Hour Cancellation Cutoff
-            if booking.session.start_time <= timezone.now() + timedelta(hours=2):
-                return Response({"error": "Cannot cancel within 2 hours of session start."}, status=400)
+            # RULE 1: 2-Hour Cancellation Cutoff
+            if time_until_session <= timedelta(hours=2):
+                return Response({
+                    "error": "Too late to cancel. Cancellations are disabled 2 hours before the session."
+                }, status=400)
             
+            # RULE 2: Credits forfitted if you cancel between 2 and 12 hours before
+            is_late_cancel = time_until_session < timedelta(hours=12)
+
+            if is_late_cancel:
+                booking.status = 'CANCELLED'
+                booking.save()
+                
+                # We log it, but we DO NOT update the package credits.
+                Transaction.objects.create(
+                    user=user,
+                    package=package,
+                    transaction_type='CANCEL',
+                    credits_used=0, # 0 because no refund was given
+                    reference_id=f"LATE-CANCEL:{booking.id}"
+                )
+                return Response({"message": "Late cancellation: Booking removed, but credit forfeited."}, status=200)
+
+            # RULE 3: Standard refund, more than 12 hours before
             # 2. Find the EXACT transaction for this booking
-            tx = Transaction.objects.get(
+            tx = Transaction.objects.filter(
                 user=user, 
                 transaction_type='BOOKING', 
                 reference_id=f"BOOKING:{booking.id}"
-            )
+            ).first()
 
             if not tx:
                 return Response({"error": "Original transaction not found."}, status=400)

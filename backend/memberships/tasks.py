@@ -1,7 +1,8 @@
 from celery import shared_task
 from django.utils import timezone
 from datetime import timedelta
-from .models import UserPackage
+from .models import UserPackage, Transaction
+from bookings.models import Booking
 
 @shared_task
 def monthly_guest_pass_reset():
@@ -59,4 +60,24 @@ def cleanup_stuck_payments():
     # Logic to handle the cleanup (e.g., delete or mark as failed)
     stuck_transactions.delete() 
     return f"Cleaned up {count} stuck payment attempts."
+
+@shared_task
+def process_past_bookings():
+    """
+    Runs every hour. Finds bookings for sessions that ended 
+    over an hour ago and are still 'CONFIRMED'.
+    Marks them as 'NO_SHOW'.
+    """
+    one_hour_ago = timezone.now() - timedelta(hours=1)
+    
+    # Find bookings where session started in the past but status wasn't updated
+    stale_bookings = Booking.objects.filter(
+        session__start_time__lt=one_hour_ago,
+        status='CONFIRMED'
+    )
+    
+    count = stale_bookings.count()
+    stale_bookings.update(status='NO_SHOW')
+    
+    return f"Processed {count} bookings as No-Shows."
 

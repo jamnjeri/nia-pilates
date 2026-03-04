@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from celery.schedules import crontab
+from datetime import timedelta
+from django.apps import AppConfig
 import environ
 import os
 
@@ -164,7 +166,7 @@ REST_FRAMEWORK = {
     )
 }
 
-from datetime import timedelta
+
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
@@ -191,4 +193,12 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'memberships.tasks.cleanup_stuck_payments',
         'schedule': crontab(minute='*/15'), # Every 15 minutes
     },
+    'process-no-shows-hourly': {
+        'task': 'memberships.tasks.process_past_bookings',
+        'schedule': crontab(minute=0), # Top of every hour
+    },
 }
+
+# This tells Django to use the old AutoField for the Daraja library
+# so it stops trying to generate a migration to "upgrade" it to BigAutoField.
+AppConfig.default_auto_field = 'django.db.models.AutoField'
