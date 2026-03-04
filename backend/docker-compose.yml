@@ -11,6 +11,9 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
 
+  redis:
+    image: redis:7-alpine
+
   # The Django "Room"
   web:
     build: .
@@ -23,6 +26,29 @@ services:
       - .env  # This tells Docker to load ALL variables from your .env file
     depends_on:
       - db
+      - redis
+  
+  worker:
+    build: .
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+
+  beat:
+    build: .
+    command: celery -A config beat --loglevel=info
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
 
 volumes:
   postgres_data:
