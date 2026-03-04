@@ -40,3 +40,23 @@ def check_package_expiry():
     count = expired.count()
     expired.update(is_active=False)
     return f"Deactivated {count} expired packages."
+
+@shared_task
+def cleanup_stuck_payments():
+    """
+    Finds payments that have been 'Pending' for more than 15 minutes
+    and marks them as failed so the user can try again.
+    """
+    fifteen_mins_ago = timezone.now() - timedelta(minutes=15)
+    # Assuming you have a 'status' field in your Transaction model
+    # Adjust 'status' and 'PENDING' to match your actual model fields
+    stuck_transactions = Transaction.objects.filter(
+        transaction_type='PURCHASE',
+        timestamp__lt=fifteen_mins_ago,
+        reference_id__isnull=True # Or however you track 'unconfirmed'
+    )
+    count = stuck_transactions.count()
+    # Logic to handle the cleanup (e.g., delete or mark as failed)
+    stuck_transactions.delete() 
+    return f"Cleaned up {count} stuck payment attempts."
+

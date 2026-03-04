@@ -187,4 +187,8 @@ CELERY_BEAT_SCHEDULE = {
         'task': 'memberships.tasks.check_package_expiry',
         'schedule': crontab(minute=0, hour=1), # 1:00 AM every day
     },
+    'cleanup-payments-every-15-mins': {
+        'task': 'memberships.tasks.cleanup_stuck_payments',
+        'schedule': crontab(minute='*/15'), # Every 15 minutes
+    },
 }
