@@ -1,0 +1,74 @@
+{
+  "classes": [
+    {
+      "id": 1,
+      "title": "Reformer Pilates",
+      "description": "Build long, lean muscles using our state-of-the-art reformer machines. Perfect for all levels.",
+      "duration": "55 min",
+      "capacity": "8 per class"
+    },
+    { "id": 2, "title": "Mat Pilates", "description": "A classic full-body workout focusing on core strength, flexibility, and controlled breathing.", "duration": "50 min", "capacity": "12 per class" },
+    { "id": 3, "title": "Barre Fusion", "description": "A dynamic blend of ballet, pilates, and yoga to sculpt and tone your entire body.", "duration": "45 min", "capacity": "10 per class" },
+    { "id": 4, "title": "Prenatal Pilates", "description": "Gentle, supportive movement designed for expectant mothers. Safe throughout every trimester.", "duration": "45 min", "capacity": "6 per class" }
+  ],
+"pricing": [
+    {
+      "id": 1,
+      "name": "Drop-In",
+      "description": "Perfect for trying us out or occasional visits.",
+      "price": "2,500",
+      "validity": "per class",
+      "features": [
+        "Single class access",
+        "All class types",
+        "Complimentary mat & towel",
+        "Booking via app or phone"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Monthly",
+      "description": "Our most popular plan for committed movers.",
+      "price": "18,000",
+      "validity": "per month",
+      "features": [
+        "Unlimited classes",
+        "Priority booking",
+        "Complimentary mat & towel",
+        "1 guest pass per month",
+        "Access to workshops",
+        "Locker included"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "10-Class Pack",
+      "description": "Flexible pack for those who prefer their own rhythm.",
+      "price": "20,000",
+      "validity": "valid 3 months",
+      "features": [
+        "10 classes of any type",
+        "Valid for 3 months",
+        "Complimentary mat & towel",
+        "Booking via app or phone",
+        "Shareable with 1 friend"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Annual",
+      "description": "The ultimate commitment to your wellness journey.",
+      "price": "170,000",
+      "validity": "per year",
+      "features": [
+        "Unlimited classes",
+        "Priority booking",
+        "Complimentary mat & towel",
+        "4 guest passes per month",
+        "All workshops included",
+        "Personal locker",
+        "Quarterly assessment"
+      ]
+    }
+  ]
+}
