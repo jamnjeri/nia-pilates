@@ -8,6 +8,11 @@ from rest_framework.views import APIView
 from memberships.models import UserPackage
 from bookings.models import Booking
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+from .models import PasswordResetOTP
+from utils.sms_gateway import send_otp_sms
+from datetime import timedelta
+import random
 
 # Create your views here.
 class RegisterView(generics.CreateAPIView):
@@ -80,4 +85,87 @@ class UserDetailView(APIView):
             "active_memberships": memberships_data,
             "upcoming_classes": bookings_list
         })
+
+User = get_user_model()
+
+class RequestPasswordResetView(APIView):
+    permission_classes = (AllowAny,)
     
+    def post(self, request):
+        phone_number = request.data.get('phone_number', '')
+
+        if not phone_number:
+            return Response({"error": "Phone number is required."}, status=400)
+
+        # FIX: Clean the number for DB lookup (remove +)
+        db_phone = phone_number.replace('+', '')
+
+        # Use the CLEANED number to check if the user exists
+        user_exists = User.objects.filter(phone_number=db_phone).exists()
+
+        # Rate Limiting (Check against raw input to match how it's stored in OTP table)
+        one_day_ago = timezone.now() - timedelta(hours=24)
+        daily_requests = PasswordResetOTP.objects.filter(
+            phone_number=phone_number, 
+            created_at__gte=one_day_ago
+        ).count()
+
+        if daily_requests >= 3:
+            return Response({
+                "error": "Maximum password reset attempts reached for today."
+            }, status=429)
+        
+        last_otp = PasswordResetOTP.objects.filter(phone_number=phone_number).order_by('-created_at').first()
+        if last_otp and not last_otp.is_expired_rate_limit():
+            return Response({"error": "Please wait 2 minutes."}, status=429)
+        
+        # Only perform actions if user exists, but don't tell the UI
+        if user_exists:
+            otp_code = str(random.randint(100000, 999999))
+            PasswordResetOTP.objects.create(phone_number=phone_number, otp_code=otp_code)
+            
+            # Send via Africa's Talking (using raw number which has the +)
+            send_otp_sms(phone_number, otp_code)
+
+        # SECURITY FIX: Always return 200 and the same message
+        return Response({"message": "If this number is registered, you will receive a code shortly."}, status=200)
+            
+class VerifyPasswordResetView(APIView):
+    permission_classes = (AllowAny,)
+    
+    def post(self, request):
+        phone_number = request.data.get('phone_number', '')
+        otp_code = request.data.get('otp_code')
+        new_password = request.data.get('new_password')
+
+        if not all([phone_number, otp_code, new_password]):
+            return Response({"error": "All fields are required."}, status=400)
+        
+        # Standardize for DB lookup
+        db_phone = phone_number.replace('+', '')
+
+        # Find OTP (Using raw phone_number as it was saved in Request)
+        otp_record = PasswordResetOTP.objects.filter(
+            phone_number=phone_number, 
+            otp_code=otp_code,
+            is_verified=False
+        ).order_by('-created_at').first()
+
+        if not otp_record or not otp_record.is_valid():
+            return Response({"error": "Invalid or expired code."}, status=400)
+        
+        # Update User
+        try:
+            user = User.objects.get(phone_number=db_phone)
+            user.set_password(new_password)
+            user.save()
+
+            otp_record.is_verified = True
+            otp_record.save()
+
+            return Response({"message": "Password has been reset successfully."}, status=200)
+        except User.DoesNotExist:
+            # Again, generic success for security
+            return Response({"message": "Password has been reset successfully."}, status=200)
+
+        
