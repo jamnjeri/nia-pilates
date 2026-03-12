@@ -3,9 +3,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.utils import timezone
 from django.db import transaction as db_transaction  # Renamed to avoid conflict with model name
-from .models import Booking, Session
+from .models import Booking, Session, ClassType
 from memberships.models import UserPackage, Transaction
-from .serializers import SessionSerializer, BookingSerializer
+from .serializers import SessionSerializer, BookingSerializer, ClassTypeSerializer
 from django.db.models import Sum
 from datetime import timedelta
 
@@ -16,7 +16,13 @@ class SessionListView(generics.ListAPIView):
     serializer_class = SessionSerializer
     permission_classes = [AllowAny]
 
-# 2. Book a session
+# 2. List available classes
+class ClassTypeListView(generics.ListAPIView):
+    queryset = ClassType.objects.all()
+    serializer_class = ClassTypeSerializer
+    permission_classes = [AllowAny]
+
+# 3. Book a session
 class BookSessionView(views.APIView):
     permission_classes = [IsAuthenticated]
 

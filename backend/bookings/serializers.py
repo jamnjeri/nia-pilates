@@ -24,4 +24,10 @@ class BookingSerializer(serializers.ModelSerializer):
         model = Booking
         fields = ['id', 'session', 'status', 'booked_at', 'slots_reserved']
         read_only_fields = ['status', 'booked_at']
+
+
+class ClassTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClassType
+        fields = ['id', 'name', 'description', 'duration_minutes']
         

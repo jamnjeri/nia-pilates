@@ -41,6 +41,26 @@ class UserDetailView(APIView):
 
         now=timezone.now()
 
+        # Classes Attended Count
+        classes_attended_count = Booking.objects.filter(
+            user=user, 
+            status='ATTENDED'
+        ).count()
+
+        # Attendance History (Last 5 completed bookings)
+        attended_query = Booking.objects.filter(
+            user=user,
+            status='ATTENDED'
+        ).select_related('session', 'session__class_type').order_by('-session__start_time')[:5]
+
+        history_list = []
+        for b in attended_query:
+            history_list.append({
+                "class_name": b.session.class_type.name,
+                "date": b.session.start_time.strftime('%Y-%m-%d'),
+                "instructor": b.session.instructor_name
+            })
+
         # Fetch ALL Active packages
         active_packages = UserPackage.objects.filter(
             user=user, 
@@ -59,16 +79,16 @@ class UserDetailView(APIView):
                 "expiry_date": pkg.expiry_date.strftime('%Y-%m-%d'),
             })
 
-        # Bookings
-        upcoming_bookings = Booking.objects.filter(
+        # Upcoming Classes
+        upcoming_query = Booking.objects.filter(
             user=user,
             status='CONFIRMED',
-            session__start_time__gt=timezone.now()
+            session__start_time__gt=now
         ).select_related('session', 'session__class_type').order_by('session__start_time')
 
-        bookings_list = []
-        for b in upcoming_bookings:
-            bookings_list.append({
+        upcoming_list = []
+        for b in upcoming_query:
+            upcoming_list.append({
                 "booking_id": b.id,
                 "class_name": b.session.class_type.name,
                 "start_time": b.session.start_time,
@@ -81,9 +101,12 @@ class UserDetailView(APIView):
                 "name": user.name,
                 "phone_number": user.phone_number,
                 "email": user.email,
+                "date_joined": user.date_joined.strftime('%Y-%m-%d'),
+                "classes_attended_count": classes_attended_count,
             },
             "active_memberships": memberships_data,
-            "upcoming_classes": bookings_list
+            "attendance_history": history_list,
+            "upcoming_classes": upcoming_list
         })
 
 User = get_user_model()

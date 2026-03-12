@@ -15,6 +15,7 @@ class PackageTemplate(models.Model):
     name = models.CharField(max_length=20, choices=NAME_CHOICES, unique=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    features = models.JSONField(default=list, blank=True)
 
     duration_days = models.IntegerField(
         verbose_name="Validity Period (Days)", 
