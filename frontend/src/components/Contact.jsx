@@ -19,8 +19,8 @@ const contactDetails = [
     id: 3,
     icon: <Mail size={24} />,
     title: "Email",
-    line1: "hello@asalipilates.co.ke",
-    line2: "bookings@asalipilates.co.ke",
+    line1: "hello@niapilates.co.ke",
+    line2: "bookings@niapilates.co.ke",
   },
   {
     id: 4,

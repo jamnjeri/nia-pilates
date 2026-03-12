@@ -1,7 +1,24 @@
 import heroImage from '../../src/assets/hero-studio.jpg';
-import { ChevronRight, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const Hero = () => {
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      // Offset by 80px to account for the fixed navbar height
+      const offset = 25;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition -offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <section 
       className="relative h-[100vh] flex items-center justify-center px-6 md:px-12"
@@ -44,12 +61,16 @@ const Hero = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-4 pt-4">
-          <button className="bg-orange text-white py-[10px] px-[20px] rounded-[10px] font-medium flex items-center gap-2 hover:bg-orange/90 transition-all border border-orange">
+          <button
+            onClick={() => scrollToSection('pricing')}
+            className="bg-orange text-white py-[10px] px-[20px] rounded-[10px] font-medium flex items-center gap-2 hover:bg-orange/90 transition-all border border-orange">
             View Pricing
             <ArrowRight size={18} />
           </button>
           
-          <button className="bg-transparent text-white border border-white py-[10px] px-[20px] rounded-[10px] font-medium hover:bg-white/10 transition-all">
+          <button
+            onClick={() => scrollToSection('about')}
+            className="bg-transparent text-white border border-white py-[10px] px-[20px] rounded-[10px] font-medium hover:bg-white/10 transition-all">
             Learn more
           </button>
         </div>

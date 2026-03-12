@@ -1,11 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
-// import classReducer from "./classSlice";
+import classTypesReducer from "./classSlice";
+import packagesReducer from "./packagesSlice";
+import sessionsReducer from "./sessionsSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    // Add others here as you build them:
-    // classes: classReducer,
+    classTypes: classTypesReducer,
+    packages: packagesReducer,
+    sessions: sessionsReducer,
   },
 });

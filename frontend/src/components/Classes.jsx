@@ -1,8 +1,10 @@
 import { Flame, Clock, Users } from "lucide-react";
 import siteData from "./data";
+import { useSelector } from "react-redux";
 
-const Classes = () => {
-  const { classes } = siteData
+const Classes = ({ onBookClick }) => {
+  const { items = [], loading = false } = useSelector((state) => state.classTypes || {});
+
   return (
     <section className="py-12 px-6 md:px-12 lg:px-24 bg-greybeige">
       <div className="max-w-7xl mx-auto text-center space-y-12">
@@ -22,10 +24,11 @@ const Classes = () => {
 
         {/* Classes Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-8">
-          {classes.map((item) => (
+          {items.map((item) => (
             <div 
-              key={item.id} 
-              className="bg-beige p-8 rounded-[20px] shadow-sm border border-line flex flex-col items-start text-left hover:shadow-md transition-shadow duration-300"
+              key={item.id}
+              onClick={() => onBookClick(item.title)}
+              className="bg-beige p-8 rounded-[20px] shadow-sm border border-line flex flex-col items-start text-left hover:shadow-md transition-shadow duration-300 cursor-pointer"
             >
               {/* Flame Icon Box */}
               <div className="bg-orange/10 p-3 rounded-[12px] mb-6">
@@ -33,7 +36,7 @@ const Classes = () => {
               </div>
 
               {/* Title & Description */}
-              <h3 className="font-serif text-xl text-black mb-3">{item.title}</h3>
+              <h3 className="font-serif text-xl text-black mb-3">{item.title || item.name}</h3>
               <p className="text-lightbrown text-sm leading-relaxed mb-8 flex-grow">
                 {item.description}
               </p>
@@ -42,12 +45,16 @@ const Classes = () => {
               <div className="space-y-3 w-full border-t border-line pt-6">
                 <div className="flex items-center gap-3 text-btext">
                   <Clock size={16} className="text-orange" />
-                  <span className="text-xs font-medium uppercase tracking-wider">{item.duration}</span>
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    {item.duration_minutes} {item.duration_minutes?.toString().includes('min') ? '' : 'min'}
+                  </span>
                 </div>
-                <div className="flex items-center gap-3 text-btext">
+                {/* <div className="flex items-center gap-3 text-btext">
                   <Users size={16} className="text-orange" />
-                  <span className="text-xs font-medium uppercase tracking-wider">{item.capacity}</span>
-                </div>
+                  <span className="text-xs font-medium uppercase tracking-wider">
+                    {item.capacity} {item.capacity?.toString().includes('per class') ? '' : 'Per Class'}
+                  </span>
+                </div> */}
               </div>
             </div>
           ))}

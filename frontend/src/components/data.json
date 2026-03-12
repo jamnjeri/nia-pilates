@@ -4,33 +4,54 @@
       "id": 1,
       "title": "Reformer Pilates",
       "description": "Build long, lean muscles using our state-of-the-art reformer machines. Perfect for all levels.",
-      "duration": "55 min",
+      "duration_minutes": "55 min",
       "capacity": "8 per class"
     },
-    { "id": 2, "title": "Mat Pilates", "description": "A classic full-body workout focusing on core strength, flexibility, and controlled breathing.", "duration": "50 min", "capacity": "12 per class" },
-    { "id": 3, "title": "Barre Fusion", "description": "A dynamic blend of ballet, pilates, and yoga to sculpt and tone your entire body.", "duration": "45 min", "capacity": "10 per class" },
-    { "id": 4, "title": "Prenatal Pilates", "description": "Gentle, supportive movement designed for expectant mothers. Safe throughout every trimester.", "duration": "45 min", "capacity": "6 per class" }
+    { 
+      "id": 2,
+      "title": "Mat Pilates", 
+      "description": "A classic full-body workout focusing on core strength, flexibility, and controlled breathing.", 
+      "duration_minutes": "50 min", 
+      "capacity": "12 per class" 
+    },
+    { 
+      "id": 3, 
+      "title": "Barre Fusion", 
+      "description": "A dynamic blend of ballet, pilates, and yoga to sculpt and tone your entire body.", 
+      "duration_minutes": "45 min", 
+      "capacity": "10 per class" 
+    },
+    { 
+      "id": 4, 
+      "title": "Prenatal Pilates", 
+      "description": "Gentle, supportive movement designed for expectant mothers. Safe throughout every trimester.", 
+      "duration_minutes": "45 min", 
+      "capacity": "6 per class" 
+    }
   ],
 "pricing": [
     {
       "id": 1,
-      "name": "Drop-In",
+      "name": "DROP-IN",
       "description": "Perfect for trying us out or occasional visits.",
-      "price": "2,500",
-      "validity": "per class",
+      "price": "2500.00",
+      "duration_days": 1,
+      "total_credits": 1,
+      "is_unlimited": false,
       "features": [
         "Single class access",
         "All class types",
-        "Complimentary mat & towel",
-        "Booking via app or phone"
+        "Complimentary mat & towel"
       ]
     },
     {
       "id": 2,
-      "name": "Monthly",
+      "name": "MONTHLY",
       "description": "Our most popular plan for committed movers.",
-      "price": "18,000",
-      "validity": "per month",
+      "price": "18000.00",
+      "duration_days": 30,
+      "total_credits": 0,
+      "is_unlimited": true,
       "features": [
         "Unlimited classes",
         "Priority booking",
@@ -44,13 +65,14 @@
       "id": 3,
       "name": "10-Class Pack",
       "description": "Flexible pack for those who prefer their own rhythm.",
-      "price": "20,000",
-      "validity": "valid 3 months",
+      "price": "20000.00",
+      "duration_days": 90,
+      "total_credits": 10,
+      "is_unlimited": false,
       "features": [
         "10 classes of any type",
         "Valid for 3 months",
         "Complimentary mat & towel",
-        "Booking via app or phone",
         "Shareable with 1 friend"
       ]
     },
@@ -58,8 +80,10 @@
       "id": 4,
       "name": "Annual",
       "description": "The ultimate commitment to your wellness journey.",
-      "price": "170,000",
-      "validity": "per year",
+      "price": "170000.00",
+      "duration_days": 365,
+      "total_credits": 0,
+      "is_unlimited": true,
       "features": [
         "Unlimited classes",
         "Priority booking",
