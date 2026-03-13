@@ -1,6 +1,12 @@
-# Nia Pilates: Boutique Studio Management System
+# Nia Pilates — Boutique Studio Management System
 
-A full-stack boutique studio management platform designed for the Kenyan market, featuring real-time class scheduling, membership management, and M-Pesa integrated payments.
+![Status](https://img.shields.io/badge/status-active-success)
+![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20Vite-blue)
+![Backend](https://img.shields.io/badge/backend-Django%20REST-green)
+![Payments](https://img.shields.io/badge/payments-M--Pesa-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
+A **full-stack boutique studio management platform** designed for the Kenyan market, featuring **real-time class scheduling, membership management, and M-Pesa integrated payments**.
 
 ---
 
@@ -8,8 +14,18 @@ A full-stack boutique studio management platform designed for the Kenyan market,
 
 The project is split into two main directories:
 
-- **/frontend**: A high-performance React application built with **Vite**, **Redux Toolkit**, and **Tailwind CSS**.
-- **/backend**: A robust **Django REST Framework** API containerized with **Docker**, featuring **Celery** for background task processing and **Redis** for caching.
+### Frontend
+- **React + Vite** – High performance development build
+- **Redux Toolkit** – Centralized state management
+- **Tailwind CSS** – Custom studio theme
+- **Lucide React** – Consistent icon system
+
+### Backend
+- **Django REST Framework** – Clean API layer
+- **PostgreSQL** – Primary relational database
+- **Redis** – Caching & message broker
+- **Celery** – Background job processing
+- **Docker** – Containerized development environment
 
 ---
 
@@ -18,8 +34,8 @@ The project is split into two main directories:
 ### Prerequisites
 
 - Docker & Docker Compose  
-- Node.js (v18+)  
-- Python 3.10+
+- Node.js **v18+**
+- Python **3.10+**
 
 ### Quick Start
 
