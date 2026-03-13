@@ -10,6 +10,8 @@ import Profile from './pages/Profile';
 import { fetchUserProfile } from './redux/authSlice';
 import { fetchClassTypes } from './redux/classSlice';
 import { fetchPackages } from './redux/packagesSlice';
+import ScrollToHash from './components/ScrollToHash';
+
 function App() {
   const dispatch = useDispatch();
 
@@ -24,6 +26,7 @@ function App() {
   
   return (
     <Router>
+      <ScrollToHash />
       <div className="min-h-screen bg-beige">
         <Routes>
           {/* Main Landing Page with sections */}

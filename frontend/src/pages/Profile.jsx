@@ -5,6 +5,7 @@ import { logout } from '../redux/authSlice';
 import { useEffect, useState } from 'react';
 import SupportModal from '../modals/SupportModal';
 import ScheduleModal from '../modals/ScheduleModal';
+import { cancelBooking } from '../redux/bookingSlice';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -38,6 +39,12 @@ const Profile = () => {
       date: date.toLocaleDateString('en-KE', { weekday: 'short', month: 'short', day: 'numeric' }),
       time: date.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', hour12: true })
     };
+  };
+
+  const handleCancel = (bookingId) => {
+    if (window.confirm("Are you sure you want to cancel this session? Your credit will be returned.")) {
+      dispatch(cancelBooking(bookingId));
+    }
   };
 
   return (
@@ -101,7 +108,7 @@ const Profile = () => {
                 <div className="flex gap-4">
                   <div className="flex-1 bg-greybeige p-4 rounded-[12px] border border-line/50 text-left">
                     <p className="text-[10px] uppercase tracking-widest text-lightbrown font-bold mb-1">Credits</p>
-                    <p className="text-3xl font-serif text-brown">{currentPlan.remaining_credits}</p>
+                    <p className="text-3xl font-serif text-brown">{currentPlan.credits_remaining}</p>
                   </div>
                 </div>
               </div>
@@ -141,7 +148,7 @@ const Profile = () => {
             <button
               onClick={() => setIsSupportOpen(true)}
               className="w-full bg-white/10 border border-white/20 text-white text-[10px] font-bold uppercase tracking-widest py-3 rounded-[10px] hover:bg-white/20 transition-all">
-              Contact Support
+                Contact Support
             </button>
           </div>
         </div>
@@ -152,7 +159,7 @@ const Profile = () => {
           <div className="bg-white p-6 md:p-8 rounded-[20px] shadow-sm border border-line min-h-[300px]">
             <div className="flex justify-between items-center mb-8">
               <h3 className="font-serif text-2xl text-black">Your Schedule</h3>
-              <Link to="/#classes" className="text-orange text-xs font-bold uppercase tracking-widest bg-orange/5 px-3 py-2 rounded-lg">
+              <Link to="/#classes" className="bg-brown text-white text-[10px] font-bold uppercase tracking-[0.15em] px-5 py-2.5 rounded-xl transition-all duration-300 hover:bg-orange hover:shadow-lg hover:shadow-orange/20 cursor-pointer">
                 Book Session
               </Link>
             </div>
@@ -181,8 +188,10 @@ const Profile = () => {
                         </div>
                       </div>
                       <div className="flex items-center justify-end">
-                        <button className="text-[10px] font-bold uppercase tracking-widest text-lightbrown hover:text-red-500 transition-colors">
-                          Cancel
+                        <button
+                          onClick={() => handleCancel(booking.booking_id)}
+                          className="text-[10px] font-bold uppercase tracking-widest text-lightbrown hover:text-red-500 transition-colors">
+                            Cancel
                         </button>
                       </div>
                     </div>
@@ -200,12 +209,29 @@ const Profile = () => {
           {/* Attendance History */}
           <div className="bg-white p-6 md:p-8 rounded-[20px] shadow-sm border border-line">
             <h3 className="font-serif text-2xl text-black mb-8 flex items-center gap-2">
-               <History size={24} className="text-orange" /> Class History
+                <History size={24} className="text-orange" /> Class History
             </h3>
+            
             {attendance_history && attendance_history.length > 0 ? (
-               <div className="space-y-4"> {/* Past sessions mapping */} </div>
+                <div className="space-y-4"> {/* Wrap the map in a container */}
+                {attendance_history.map((past) => {
+                    const { date, time } = formatSessionTime(past.start_time);
+                    return (
+                    <div key={past.id} className="flex items-center justify-between p-4 border-b border-line last:border-0 opacity-70">
+                        <div className="flex items-center gap-4 text-left">
+                        <History size={16} className="text-lightbrown" />
+                        <div>
+                            <p className="font-bold text-black text-sm">{past.class_name}</p>
+                            <p className="text-[10px] text-lightbrown font-medium uppercase tracking-widest">{date} • {past.instructor}</p>
+                        </div>
+                        </div>
+                        <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest bg-green-50 px-2 py-1 rounded">Attended</span>
+                    </div>
+                    );
+                })}
+                </div>
             ) : (
-               <p className="text-center py-10 text-lightbrown text-sm italic">Your practice journey starts here.</p>
+                <p className="text-center py-10 text-lightbrown text-sm italic">Your practice journey starts here.</p>
             )}
           </div>
         </div>
