@@ -121,9 +121,21 @@ class Transaction(models.Model):
         ('CANCEL', 'Cancellation')
     ]
 
+    # To track the handshake
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('COMPLETED', 'Completed'),
+        ('FAILED', 'Failed'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    package_template = models.ForeignKey(PackageTemplate, on_delete=models.SET_NULL, null=True, blank=True)
     package = models.ForeignKey(UserPackage, on_delete=models.SET_NULL, null=True)
     transaction_type = models.CharField(max_length=20, choices=TYPES)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
+    checkout_request_id = models.CharField(max_length=100, blank=True, null=True, unique=True)
+
     amount_money = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     credits_used = models.IntegerField(default=0)
     guest_passes_used = models.IntegerField(default=0)

@@ -31,6 +31,11 @@ class BookSessionView(views.APIView):
         user = request.user
         session_id = request.data.get('session_id')
 
+        try:
+            session = Session.objects.select_for_update().get(id=session_id)
+        except Session.DoesNotExist:
+            return Response({"error": "Session not found"}, status=404)
+
         # Can't book a class that has already started
         if session.start_time <= timezone.now():
             return Response({"error": "Cannot book a session that has already started."}, status=400)
@@ -44,21 +49,17 @@ class BookSessionView(views.APIView):
 
 
         # 2. Row Locking:  Get Session & Check Capacity with a lock aka to prevent race condition/overselling
-        try:
-            session = Session.objects.select_for_update().get(id=session_id)    #.select_for_update() locks this row until the transaction is finished.
-            package = UserPackage.objects.select_for_update().filter(
-                user=user, 
-                is_active=True,
-                expiry_date__gt=timezone.now()
-            ).order_by('expiry_date').first() # Locks this row as well & Uses the one expiring soonest first!
+        package = UserPackage.objects.select_for_update().filter(                    #.select_for_update() locks this row until the transaction is finished.
+            user=user, 
+            is_active=True,
+            expiry_date__gt=timezone.now()
+        ).order_by('expiry_date').first()     # Locks this row as well & Uses the one expiring soonest first!
 
-        except Session.DoesNotExist:
-            return Response({"error": "Session not found"}, status=404)
         
         if not package:
             return Response({"error": "No active membership found."}, status=400)
         
-        # 3. Capcity check
+        # 3. Capacity check
         total_reserved = session.bookings.filter(status='CONFIRMED').aggregate(
             total=Sum('slots_reserved'))['total'] or 0
         if total_reserved + slots > session.capacity:
@@ -113,77 +114,62 @@ class CancelBookingView(views.APIView):
     permission_classes = [IsAuthenticated]
 
     @db_transaction.atomic
-
     def post(self, request, booking_id):
         user = request.user
         try:
+            # 1. Fetch the booking
             booking = Booking.objects.select_for_update().get(id=booking_id, user=user, status='CONFIRMED')
-            package = UserPackage.objects.select_for_update().get(id=booking.package.id)
-
-            # THE BUSINESS RULE: 12-Hour Window
+            session = booking.session
             now = timezone.now()
-            time_until_session = booking.session.start_time - now
-            
-            # RULE 1: 2-Hour Cancellation Cutoff
-            if time_until_session <= timedelta(hours=2):
-                return Response({
-                    "error": "Too late to cancel. Cancellations are disabled 2 hours before the session."
-                }, status=400)
-            
-            # RULE 2: Credits forfitted if you cancel between 2 and 12 hours before
-            is_late_cancel = time_until_session < timedelta(hours=12)
 
-            if is_late_cancel:
+            # 2. The 2-hour rule (No cancellation allowed)
+            if now >= session.start_time - timedelta(hours=2):
+                return Response({"error": "Late cancellation (within 2 hours) is not permitted."}, status=400)
+
+            # --- STEP 3: THE SAFETY CHECK (ADD THIS PART) ---
+            if not booking.package:
+                # If there is no package, just release the spot and exit
                 booking.status = 'CANCELLED'
                 booking.save()
-                
-                # We log it, but we DO NOT update the package credits.
+                return Response({"message": "Booking cancelled (No package found to refund)."})
+            # ------------------------------------------------
+
+            # 4. Fetch the package (Safe to access .id now)
+            package = UserPackage.objects.select_for_update().get(id=booking.package.id)
+
+            # 5. The 12-hour rule (No refund, but spot is released)
+            if now > session.start_time - timedelta(hours=12):
+                booking.status = 'CANCELLED'
+                booking.save()
+                return Response({"message": "Late cancellation: Spot released but credits were not refunded."})
+
+            # 6. Standard Refund (> 12 hours)
+            tx = Transaction.objects.filter(reference_id=f"BOOKING:{booking.id}").first()
+            
+            if tx:
+                package.credits_remaining += tx.credits_used
+                package.guest_passes_remaining += tx.guest_passes_used
+                package.save()
+
+                # Log the cancellation
                 Transaction.objects.create(
                     user=user,
                     package=package,
                     transaction_type='CANCEL',
-                    credits_used=0, # 0 because no refund was given
-                    reference_id=f"LATE-CANCEL:{booking.id}"
-                )
-                return Response({"message": "Late cancellation: Booking removed, but credit forfeited."}, status=200)
+                    credits_used=-tx.credits_used,
+                    guest_passes_used=-tx.guest_passes_used,
+                    reference_id=f"CANCEL:{booking.id}"
+                    )
 
-            # RULE 3: Standard refund, more than 12 hours before
-            # 2. Find the EXACT transaction for this booking
-            tx = Transaction.objects.filter(
-                user=user, 
-                transaction_type='BOOKING', 
-                reference_id=f"BOOKING:{booking.id}"
-            ).first()
-
-            if not tx:
-                return Response({"error": "Original transaction not found."}, status=400)
-            
-
-            # 3. Perform the refund
-            package.credits_remaining += tx.credits_used
-            package.guest_passes_remaining += tx.guest_passes_used
-            package.save()
-
-            # 4. Update booking Status
             booking.status = 'CANCELLED'
             booking.save()
-
-            # 5. Log the cancellation transaction
-            Transaction.objects.create(
-                user=user,
-                package=package,
-                transaction_type='CANCEL',
-                credits_used=-tx.credits_used, # Negative to show return
-                guest_passes_used=-tx.guest_passes_used,
-                reference_id=f"CANCEL:{booking.id}"
-            )
 
             return Response({"message": "Booking cancelled and credits restored."})
             
         except Booking.DoesNotExist:
             return Response({"error": "Booking not found or already cancelled."}, status=404)
-        except UserPackage.DoesNotExist:
-            return Response({"error": "Associated package not found."}, status=404)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
 
 class UserBookingHistoryView(generics.ListAPIView):
     serializer_class = BookingSerializer
