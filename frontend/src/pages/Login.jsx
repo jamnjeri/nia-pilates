@@ -2,7 +2,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Phone, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { loginUser } from '../redux/authSlice';
+import { loginUser, fetchUserProfile } from '../redux/authSlice';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -19,10 +19,15 @@ const Login = () => {
   });
 
   useEffect(() => {
-    if(isLoggedIn) {
-      navigate('/'); 
-    }
-  }, [isLoggedIn, navigate]);
+    const handleLoginRedirect = async () => {
+      if (isLoggedIn) {
+        await dispatch(fetchUserProfile());
+        navigate('/');
+      }
+    };
+    
+    handleLoginRedirect();
+  }, [isLoggedIn, navigate, dispatch]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
