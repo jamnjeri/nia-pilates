@@ -56,7 +56,7 @@ const paymentSlice = createSlice({
       })
       .addCase(initiatePayment.fulfilled, (state, action) => {
         state.loading = false;
-        state.checkoutId = action.payload.checkout_request_id;
+        state.checkoutId = action.payload.checkout_id;
         state.paymentStatus = 'awaiting_pin';
       })
       .addCase(initiatePayment.rejected, (state, action) => {

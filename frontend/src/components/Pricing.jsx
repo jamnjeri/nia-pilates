@@ -37,14 +37,16 @@ const Pricing = () => {
 
   useEffect(() => {
     let interval;
-    if (paymentStatus === 'pending_pin' && checkoutId) {
+    if (paymentStatus === 'awaiting_pin' && checkoutId) {
       interval = setInterval(async () => {
         try {
           const result = await dispatch(checkPaymentStatus(checkoutId)).unwrap();
           if (result.status === 'COMPLETED') {
             clearInterval(interval);
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
             dispatch(fetchUserProfile()); // Refresh user's credits
+            dispatch(fetchPackages());
           } else if (result.status === 'FAILED') {
             clearInterval(interval);
           }
