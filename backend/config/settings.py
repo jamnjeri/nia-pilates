@@ -53,6 +53,11 @@ ALLOWED_HOSTS = [
     'nia-pilates-vercel.app'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.koyeb.app',
+    'https://nia-pilates.vercel.app'
+]
+
 TEST_PAYMENTS = env.bool('TEST_PAYMENTS', default=False)
 
 MPESA_ENVIRONMENT = env('MPESA_ENVIRONMENT')
