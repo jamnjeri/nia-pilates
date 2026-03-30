@@ -26,7 +26,14 @@ env = environ.Env(
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+# environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+env_file = os.path.join(BASE_DIR, '.env')
+if os.path.exists(env_file):
+    # This only runs LOCALLY where the file exists
+    environ.Env.read_env(env_file)
+else:
+    # On Koyeb, skip the file and look at the Environment Variables in the dashboard.
+    pass
 
 
 # Quick-start development settings - unsuitable for production
