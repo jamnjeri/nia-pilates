@@ -6,7 +6,7 @@ from django.db import transaction as db_transaction  # Renamed to avoid conflict
 from .models import Booking, Session, ClassType
 from memberships.models import UserPackage, Transaction
 from .serializers import SessionSerializer, BookingSerializer, ClassTypeSerializer
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from datetime import timedelta
 
 # 1. List available sessions
@@ -53,7 +53,9 @@ class BookSessionView(views.APIView):
             user=user, 
             is_active=True,
             expiry_date__gt=timezone.now()
-        ).order_by('expiry_date').first()     # Locks this row as well & Uses the one expiring soonest first!
+        ).filter(
+            Q(package_template__is_unlimited=True) | Q(credits_remaining__gt=0)
+        ).order_by('expiry_date', 'package_template__is_unlimited').first()     # Locks this row as well & Uses the one expiring soonest first!
 
         
         if not package:

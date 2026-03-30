@@ -97,20 +97,28 @@ const Profile = () => {
           {/* Current Membership Box */}
           <div className="bg-white p-6 rounded-[20px] shadow-sm border border-line">
             <h3 className="font-serif text-xl mb-6 flex items-center gap-2 text-black text-left">
-              <CreditCard size={20} className="text-orange" /> Current Membership
+              <CreditCard size={20} className="text-orange" /> Your Memberships
             </h3>
             {hasMembership ? (
-              <div className="space-y-4">
-                <div className="bg-greybeige p-4 rounded-[12px] border border-line/50 text-left">
-                  <p className="text-[10px] uppercase tracking-widest text-lightbrown font-bold mb-1">Plan</p>
-                  <p className="text-black font-semibold text-lg capitalize">{currentPlan.plan_name.toLowerCase()}</p>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex-1 bg-greybeige p-4 rounded-[12px] border border-line/50 text-left">
-                    <p className="text-[10px] uppercase tracking-widest text-lightbrown font-bold mb-1">Credits</p>
-                    <p className="text-3xl font-serif text-brown">{currentPlan.credits_remaining}</p>
+              <div className="space-y-6">
+                {active_memberships.map((membership) => (
+                  <div key={membership.id} className='space-y-3 p-1 border-b border-line/30 last:border-0 pb-4 last:pb-0'>
+                    <div className="bg-greybeige p-4 rounded-[12px] border border-line/50 text-left">
+                      <p className="text-[10px] uppercase tracking-widest text-lightbrown font-bold mb-1">Plan</p>
+                      <p className="text-black font-semibold text-lg capitalize">{membership.plan_name.replace('_', ' ').toLowerCase()}</p>
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex-1 bg-greybeige p-4 rounded-[12px] border border-line/50 text-left">
+                        <p className="text-[10px] uppercase tracking-widest text-lightbrown font-bold mb-1">{membership.is_unlimited ? 'Access' : 'Credits Remaining'}</p>
+                        <p className="text-3xl font-serif text-brown">{membership.is_unlimited ? 'Unlimited' : membership.credits_remaining}</p>
+                      </div>
+                      <div className='flex-1 bg-greybeige p-4 rounded-[12px] border border-line/50 text-left'>
+                        <p className='text-[10px] uppercase tracking-widest text-lightbrown font-bold mb-1'>Expires</p>
+                        <p className='text-sm font-bold text-black mt-2'>{new Date(membership.expiry_date).toLocaleDateString('en-KE', { month: 'short', day: 'numeric' })}</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             ) : (
               <div className="text-left space-y-4">

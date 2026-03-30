@@ -61,7 +61,6 @@ npm run dev
 ```
 
 ## 🚀 Features & Status
-## 🛠 Features & Status
 
 | Feature | Status | Description |
 |--------|--------|-------------|
@@ -69,8 +68,8 @@ npm run dev
 | Dynamic Landing | ✅ Done | Auto-hydrating Hero, Classes, and Pricing sections from API |
 | Live Schedule | ✅ Done | Real-time session browsing with dynamic filtering by class type |
 | Profile Dashboard | ✅ Done | Member status, credit tracking, and personal booking schedule |
-| M-Pesa Integration | ⏳ In-Progress | STK Push for membership purchases and automated payment cleanup |
-| Booking System | ⏳ In-Progress | Credit-based mat reservation and attendance history tracking |
+| M-Pesa Integration | ✅ Done  | STK Push for membership purchases and automated payment cleanup |
+| Booking System | ✅ Done  | Credit-based mat reservation and attendance history tracking |
 
 ---
 
